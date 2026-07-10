@@ -1,0 +1,18 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  directory = "netlify/functions"
+
+# SPA-style: site is a single HTML page
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Path = ["!/api/*", "!/.netlify/*"]}
+
+[dev]
+  publish = "public"
+  functions = "netlify/functions"

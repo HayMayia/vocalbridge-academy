@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>VocalBridge Teammate Academy</title>
+  <style>
+    :root {
+      --navy: #0b3d5c; --teal: #1a7a6d; --teal-light: #e6f5f2;
+      --accent: #e8a317; --bg: #f0f4f8; --card: #fff; --text: #1a1a1a;
+      --muted: #5a6570; --ok: #1a7a6d; --bad: #c0392b; --soft: #e8eef3;
+      --shadow: 0 8px 28px rgba(11,61,92,.12); --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:"Segoe UI",system-ui,sans-serif; background:linear-gradient(165deg,#e8f1f6,#f0f4f8 40%,#eef6f4); color:var(--text); min-height:100vh; }
+    .top { background:linear-gradient(120deg,var(--navy),#14506f 55%,var(--teal)); color:#fff; padding:1.1rem 1.25rem; position:sticky; top:0; z-index:50; box-shadow:0 4px 20px rgba(0,0,0,.18); }
+    .top-inner { max-width:980px; margin:0 auto; }
+    .brand { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .brand h1 { margin:0; font-size:1.25rem; cursor:pointer; user-select:none; }
+    .brand h1 span.logo { border-bottom:1px dashed rgba(255,255,255,.35); }
+    .brand p { margin:.2rem 0 0; opacity:.9; font-size:.88rem; }
+    .stats { display:flex; gap:.55rem; flex-wrap:wrap; }
+    .pill { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:.35rem .75rem; font-size:.8rem; }
+    .progress-wrap { margin-top:.85rem; background:rgba(255,255,255,.15); border-radius:999px; height:10px; overflow:hidden; }
+    .progress-bar { height:100%; width:0; background:linear-gradient(90deg,var(--accent),#ffe08a); border-radius:999px; transition:width .35s; }
+    .wrap { max-width:980px; margin:0 auto; padding:1.1rem 1rem 3rem; }
+    .nav { display:flex; gap:.45rem; flex-wrap:wrap; margin:.9rem 0 1rem; }
+    .nav button { border:1px solid var(--soft); background:var(--card); color:var(--navy); border-radius:999px; padding:.45rem .8rem; font-size:.78rem; font-weight:600; cursor:pointer; }
+    .nav button.active { background:var(--navy); color:#fff; }
+    .nav button.done::after { content:" ✓"; color:#7dcea0; }
+    .panel { display:none; animation:fade .25s ease; }
+    .panel.active { display:block; }
+    @keyframes fade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+    .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.15rem 1.2rem; margin-bottom:1rem; border:1px solid rgba(11,61,92,.06); }
+    .card h2 { margin:0 0 .55rem; font-size:1.15rem; color:var(--navy); }
+    .card h3 { margin:1rem 0 .4rem; font-size:1rem; color:var(--teal); }
+    .card p, .card li { line-height:1.55; font-size:.95rem; color:#243038; }
+    .muted { color:var(--muted); font-size:.9rem; }
+    .tag { display:inline-block; background:var(--teal-light); color:var(--teal); font-size:.72rem; font-weight:700; padding:.2rem .5rem; border-radius:6px; margin-bottom:.5rem; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; }
+    @media(max-width:720px){ .grid2{grid-template-columns:1fr} }
+    .btn { border:none; border-radius:10px; padding:.65rem 1rem; font-weight:700; font-size:.9rem; cursor:pointer; }
+    .btn-primary { background:var(--navy); color:#fff; }
+    .btn-teal { background:var(--teal); color:#fff; }
+    .btn-accent { background:var(--accent); color:#1a1a1a; }
+    .btn-ghost { background:#fff; color:var(--navy); border:1px solid var(--soft); }
+    .btn-danger { background:var(--bad); color:#fff; }
+    .btn-row { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+    .diff-row { display:flex; gap:.5rem; flex-wrap:wrap; margin:.6rem 0 0; }
+    .diff-btn { flex:1; min-width:110px; padding:.7rem; border-radius:12px; border:2px solid var(--soft); background:#fff; cursor:pointer; font-weight:700; color:var(--navy); }
+    .diff-btn.active { border-color:var(--teal); background:var(--teal-light); }
+    .diff-btn small { display:block; font-weight:500; color:var(--muted); margin-top:.2rem; }
+    .term { background:#f7fafc; border:1px solid var(--soft); border-radius:12px; padding:.75rem; cursor:pointer; }
+    .term.open { background:var(--teal-light); border-color:var(--teal); }
+    .term .name { font-weight:800; color:var(--navy); }
+    .term .def { display:none; font-size:.9rem; margin-top:.35rem; }
+    .term.open .def { display:block; }
+    .sim-box { background:#0d2130; border-radius:14px; padding:.8rem; color:#d6eaf8; }
+    canvas#wave { width:100%; height:180px; display:block; background:#071520; border-radius:10px; }
+    .sim-controls { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-top:.7rem; }
+    .sim-readout { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; margin-top:.7rem; }
+    .metric { background:rgba(255,255,255,.06); border-radius:10px; padding:.55rem; text-align:center; }
+    .metric b { display:block; font-size:1.1rem; color:#7dcea0; }
+    .metric span { font-size:.75rem; opacity:.8; }
+    .decision { margin-top:.7rem; padding:.7rem; border-radius:10px; text-align:center; font-weight:800; }
+    .decision.help { background:rgba(26,122,109,.35); color:#a8f0d8; }
+    .decision.rest { background:rgba(255,255,255,.08); color:#bcd; }
+    .decision.unsure { background:rgba(232,163,23,.2); color:#ffe08a; }
+    input[type=range]{ width:140px; }
+    .q-card { border:1px solid var(--soft); border-radius:12px; padding:.9rem; margin-bottom:.7rem; background:#fbfcfd; }
+    .q-card .qtext { font-weight:700; color:var(--navy); margin-bottom:.55rem; }
+    .options { display:grid; gap:.4rem; }
+    .opt { text-align:left; padding:.6rem .75rem; border-radius:10px; border:1px solid var(--soft); background:#fff; cursor:pointer; font-size:.9rem; }
+    .opt.correct { background:#e7f8f2; border-color:var(--ok); }
+    .opt.wrong { background:#fdecea; border-color:var(--bad); }
+    .feedback { margin-top:.45rem; font-size:.88rem; color:var(--muted); }
+    .diff-badge { font-size:.7rem; font-weight:800; padding:.15rem .45rem; border-radius:6px; margin-right:.35rem; }
+    .diff-beginner { background:#e7f8f2; color:#0f5c50; }
+    .diff-medium { background:#fff6e0; color:#8a5a00; }
+    .diff-advanced { background:#fdecea; color:#7a2218; }
+    .flash-area { perspective:1000px; min-height:200px; }
+    .flash { width:100%; min-height:200px; position:relative; cursor:pointer; transform-style:preserve-3d; transition:transform .45s; }
+    .flash.flipped { transform:rotateY(180deg); }
+    .flash-face { position:absolute; inset:0; backface-visibility:hidden; border-radius:16px; display:flex; align-items:center; justify-content:center; padding:1.2rem; text-align:center; box-shadow:var(--shadow); }
+    .flash-front { background:linear-gradient(145deg,var(--navy),#1a5f7a); color:#fff; font-size:1.35rem; font-weight:800; }
+    .flash-back { background:#fff; color:var(--text); transform:rotateY(180deg); border:2px solid var(--teal); font-size:1rem; line-height:1.5; }
+    .viva-prompt { background:var(--teal-light); border-left:4px solid var(--teal); padding:.85rem 1rem; border-radius:0 12px 12px 0; font-weight:700; color:var(--navy); }
+    textarea, input[type=text], input[type=password] { width:100%; border-radius:12px; border:1px solid var(--soft); padding:.75rem; font-family:inherit; font-size:.95rem; margin-top:.5rem; }
+    textarea { min-height:90px; resize:vertical; }
+    .model-answer { display:none; margin-top:.6rem; background:#f7fafc; border-radius:12px; padding:.75rem; font-size:.9rem; border:1px dashed var(--teal); }
+    .model-answer.show { display:block; }
+    .scoreboard { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.5rem; }
+    .score-item { flex:1; min-width:100px; background:#f7fafc; border-radius:12px; padding:.7rem; text-align:center; border:1px solid var(--soft); }
+    .score-item strong { display:block; font-size:1.3rem; color:var(--navy); }
+    .remark { margin-top:.7rem; padding:.85rem 1rem; border-radius:12px; font-weight:700; display:none; }
+    .remark.show { display:block; }
+    .remark.great { background:#e7f8f2; color:#0f5c50; border:1px solid #9fe0cc; }
+    .remark.good { background:#eef6ff; color:#0b3d5c; border:1px solid #b9d4ea; }
+    .remark.ok { background:#fff6e0; color:#8a5a00; border:1px solid #f0d48a; }
+    .remark.low { background:#fdecea; color:#7a2218; border:1px solid #f0b4ad; }
+    .modal-bg { display:none; position:fixed; inset:0; background:rgba(8,20,30,.55); z-index:200; align-items:center; justify-content:center; padding:1rem; }
+    .modal-bg.show { display:flex; }
+    .modal { background:#fff; border-radius:16px; max-width:520px; width:100%; padding:1.2rem; box-shadow:var(--shadow); max-height:90vh; overflow:auto; }
+    .modal h3 { margin:0 0 .5rem; color:var(--navy); }
+    .pw-row { display:flex; gap:.4rem; align-items:center; }
+    .pw-row input { flex:1; margin-top:0; }
+    .admin-table { width:100%; border-collapse:collapse; font-size:.85rem; margin-top:.6rem; }
+    .admin-table th, .admin-table td { border:1px solid var(--soft); padding:.45rem .5rem; text-align:left; }
+    .admin-table th { background:var(--navy); color:#fff; }
+    .admin-table tr:nth-child(even){ background:#f7fafc; }
+    .name-bar { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin-top:.6rem; }
+    .name-bar input { flex:1; min-width:160px; margin-top:0; }
+    .confetti { pointer-events:none; position:fixed; inset:0; overflow:hidden; z-index:100; }
+    .dot { position:absolute; width:8px; height:8px; border-radius:50%; animation:fall 1.2s linear forwards; }
+    @keyframes fall { to { transform:translateY(100vh) rotate(480deg); opacity:0; } }
+    footer { text-align:center; color:var(--muted); font-size:.8rem; padding:1rem; }
+    .checklist label { display:flex; gap:.55rem; align-items:flex-start; padding:.45rem 0; border-bottom:1px solid var(--soft); font-size:.92rem; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <div>
+          <h1 id="logoTap" title="…"><span class="logo">VocalBridge</span> · Teammate Academy</h1>
+          <p>Interactive training for vivo Ignite — learn the project, practice the viva, mess with the signal sim.</p>
+        </div>
+        <div class="stats">
+          <div class="pill">Player: <span id="playerName">Guest</span></div>
+          <div class="pill">XP: <span id="xp">0</span></div>
+          <div class="pill">Quiz: <span id="quizScore">0</span>/<span id="quizTotal">0</span></div>
+          <div class="pill">Diff: <span id="diffLabel">Beginner</span></div>
+          <div class="pill">Sections: <span id="secDone">0</span>/8</div>
+        </div>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="nav" id="nav"></div>
+
+    <section class="panel active" data-panel="home">
+      <div class="card">
+        <span class="tag">START HERE</span>
+        <h2>Welcome to the team crash course</h2>
+        <p>This site teaches <b>VocalBridge</b> so a teammate with little technical background can still sound competent in a viva and help for real. Written for a <b>beginner</b>, not a child.</p>
+        <p class="muted">Project: low-cost system that reads residual muscle activity when someone attempts a word, then shows/speaks emergency intents like HELP — student prototype, not a hospital device.</p>
+        <h3>Your name (saved on this device)</h3>
+        <div class="name-bar">
+          <input type="text" id="nameInput" placeholder="Enter your name" maxlength="40" />
+          <button class="btn btn-primary" onclick="saveName()">Save name</button>
+        </div>
+        <h3>Difficulty (quiz level)</h3>
+        <div class="diff-row">
+          <button class="diff-btn active" data-diff="beginner" onclick="setDiff('beginner')"><span>Beginner</span><small>Starter · clear basics</small></button>
+          <button class="diff-btn" data-diff="medium" onclick="setDiff('medium')"><span>Medium</span><small>Moderate · methods</small></button>
+          <button class="diff-btn" data-diff="advanced" onclick="setDiff('advanced')"><span>Advanced</span><small>Technical · deep</small></button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="go('story')">Start: The story</button>
+          <button class="btn btn-teal" onclick="go('sim')">Signal simulator</button>
+          <button class="btn btn-accent" onclick="go('quiz')">Quiz battle</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Map</h2>
+        <div class="grid2">
+          <div><h3>Learn</h3><ul><li>Problem &amp; solution</li><li>How HELP is detected</li><li>AD8232 honesty</li><li>Roles &amp; safety</li></ul></div>
+          <div><h3>Play / practice</h3><ul><li>Signal simulator</li><li>Terms + flashcards</li><li>100-question bank (no repeats until reset)</li><li>Viva coach</li></ul></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="story">
+      <div class="card">
+        <span class="tag">SECTION 1</span>
+        <h2>The problem and the idea</h2>
+        <p>Some people cannot speak after stroke, ALS, or vocal-cord damage. Good communication devices can cost <b>₹1.5 lakh+</b>. Letter boards are slow in emergencies.</p>
+        <p>Even without audible speech, many can still <b>attempt</b> words — muscles under the chin/jaw/throat may still activate. VocalBridge targets a <b>small emergency vocabulary</b>.</p>
+        <p><b>VocalBridge</b> amplifies surface muscle signals, compares them to labeled examples, and outputs HELP (etc.) on screen/speaker when confidence is high.</p>
+        <div class="btn-row"><button class="btn btn-teal" onclick="markDone('story'); go('how')">Got it — how it works →</button></div>
+      </div>
+      <div class="card">
+        <h2>Hard truths</h2>
+        <ul>
+          <li>Not a certified medical device.</li>
+          <li>Needs residual muscle activity.</li>
+          <li>Phase-1 is mostly REST vs HELP.</li>
+          <li>Unsure → silence, not a random guess.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="how">
+      <div class="card">
+        <span class="tag">SECTION 2</span>
+        <h2>Pipeline: muscle → “Help”</h2>
+        <ol>
+          <li><b>Electrodes</b> pick up tiny skin voltages.</li>
+          <li><b>AD8232</b> amplifies (ECG-style, repurposed).</li>
+          <li><b>ESP32</b> samples the signal.</li>
+          <li><b>Software</b> filters + features.</li>
+          <li><b>Decision</b> matches labeled examples / threshold.</li>
+          <li><b>Output</b> screen + speaker/TTS if confident.</li>
+        </ol>
+        <pre style="background:#0d2130;color:#a8f0d8;padding:1rem;border-radius:12px;font-size:.82rem;">Skin → Electrodes → AD8232 → ESP32
+→ Filter / features → Match HELP cloud
+→ Confident: show + speak "Help" | Unsure: silence</pre>
+        <p>It does <b>not</b> understand English. Training labels create a HELP region; new patterns are matched. Small differences OK; huge differences → silence.</p>
+        <div class="btn-row"><button class="btn btn-teal" onclick="markDone('how'); go('sensor')">Next: sensor →</button></div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="sensor">
+      <div class="card">
+        <span class="tag">SECTION 3</span>
+        <h2>AD8232 — honest answer</h2>
+        <p>AD8232 is a <b>single-lead heart-rate/ECG front-end</b>. We repurpose the cheap module as a biopotential amplifier for a student prototype.</p>
+        <p><i>“Yes it’s an ECG front-end. We’re using it on a budget to amplify surface signals for an intent prototype — not clinical EMG.”</i></p>
+        <ul>
+          <li>Cheap, India-available, simple supply vs many dual ±9V muscle boards</li>
+          <li>Good enough for Phase-1 rest vs clear action</li>
+          <li>Limits: noise, placement, fine word separation</li>
+        </ul>
+        <div class="btn-row"><button class="btn btn-teal" onclick="markDone('sensor'); go('roles')">Next: roles →</button></div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="roles">
+      <div class="card">
+        <span class="tag">SECTION 4</span>
+        <h2>Roles &amp; safety</h2>
+        <div class="grid2">
+          <div><h3>Technical lead</h3><ul><li>Wiring &amp; code</li><li>Graph &amp; threshold</li><li>HELP + speaker path</li></ul></div>
+          <div><h3>Operations lead</h3><ul><li>Notebook &amp; trial counts</li><li>Photos &amp; filming</li><li>Impact script &amp; demo logistics</li></ul></div>
+        </div>
+        <h3>Safety</h3>
+        <ul>
+          <li>Surface pads only</li>
+          <li>Prefer power bank on skin</li>
+          <li>Adult for first tests</li>
+          <li>No medical device claims</li>
+        </ul>
+        <div class="btn-row"><button class="btn btn-teal" onclick="markDone('roles'); go('sim')">Simulator →</button></div>
+      </div>
+      <div class="card"><h2>Beginner checklist</h2><div class="checklist" id="checklist"></div></div>
+    </section>
+
+    <section class="panel" data-panel="sim">
+      <div class="card">
+        <span class="tag">LAB SIM</span>
+        <h2>Signal simulator</h2>
+        <p class="muted">Teaching sim only. Try Rest / HELP / Swallow and move the threshold.</p>
+        <div class="sim-box">
+          <canvas id="wave" width="900" height="180"></canvas>
+          <div class="sim-controls">
+            <button class="btn btn-ghost" onclick="setMode('rest')">Rest</button>
+            <button class="btn btn-teal" onclick="setMode('help')">HELP attempt</button>
+            <button class="btn btn-accent" onclick="setMode('swallow')">Swallow noise</button>
+            <label>Threshold <input type="range" id="thresh" min="20" max="90" value="55" /> <span id="threshVal">55</span></label>
+            <button class="btn btn-primary" onclick="simQuiz()">Check (+XP)</button>
+          </div>
+          <div class="sim-readout">
+            <div class="metric"><b id="mStrength">—</b><span>strength</span></div>
+            <div class="metric"><b id="mMode">rest</b><span>mode</span></div>
+            <div class="metric"><b id="mConf">—</b><span>confidence</span></div>
+          </div>
+          <div class="decision rest" id="decision">REST / SILENCE</div>
+        </div>
+        <div class="btn-row"><button class="btn btn-teal" onclick="markDone('sim'); go('terms')">Terms →</button></div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="terms">
+      <div class="card">
+        <span class="tag">SECTION 5</span>
+        <h2>Terms — tap to reveal</h2>
+        <div class="grid2" id="terms"></div>
+        <div class="btn-row"><button class="btn btn-teal" onclick="markDone('terms'); go('quiz')">Quiz →</button></div>
+      </div>
+      <div class="card">
+        <h2>Flashcards</h2>
+        <div class="flash-area">
+          <div class="flash" id="flash" onclick="flipFlash()">
+            <div class="flash-face flash-front" id="flashFront">EMG</div>
+            <div class="flash-face flash-back" id="flashBack">…</div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="prevFlash()">Previous</button>
+          <button class="btn btn-primary" onclick="nextFlash()">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="quiz">
+      <div class="card">
+        <span class="tag">QUIZ</span>
+        <h2>100-question bank · no repeats until reset</h2>
+        <p class="muted">Difficulty: <b id="quizDiffText">Beginner</b>. Questions are drawn randomly from the pool for that level. Used IDs are stored so they don’t repeat until you reset the pool.</p>
+        <div class="scoreboard">
+          <div class="score-item"><strong id="liveCorrect">0</strong>correct</div>
+          <div class="score-item"><strong id="liveWrong">0</strong>wrong</div>
+          <div class="score-item"><strong id="liveStreak">0</strong>streak</div>
+          <div class="score-item"><strong id="poolLeft">—</strong>left in pool</div>
+        </div>
+        <div class="remark" id="remarkBox"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="drawQuestion()">Next random question</button>
+          <button class="btn btn-ghost" onclick="resetPoolOnly()">Reset question pool</button>
+          <button class="btn btn-ghost" onclick="resetQuizScores()">Reset scores</button>
+          <button class="btn btn-teal" onclick="submitScoreOnline()">Submit score online</button>
+        </div>
+        <p class="muted" id="submitStatus" style="margin-top:.5rem;min-height:1.2em;"></p>
+      </div>
+      <div id="quizBox"></div>
+      <div class="card">
+        <div class="btn-row"><button class="btn btn-teal" onclick="markDone('quiz'); go('viva')">Viva coach →</button></div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="viva">
+      <div class="card">
+        <span class="tag">VIVA</span>
+        <h2>Speak like you’re on stage</h2>
+        <div class="viva-prompt" id="vivaQ">…</div>
+        <textarea id="vivaInput" placeholder="Your answer…"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="revealViva()">Show model answer</button>
+          <button class="btn btn-ghost" onclick="nextViva()">Next</button>
+          <button class="btn btn-accent" onclick="randomViva()">Random</button>
+        </div>
+        <div class="model-answer" id="vivaA"></div>
+      </div>
+      <div class="card">
+        <h2>30-second pitch</h2>
+        <p>Many people lose speech after neurological injury or disease, and good communication devices can cost over a lakh rupees. VocalBridge is our low-cost prototype that reads residual muscle activity when a person attempts a word. We amplify the skin signal, process it, and if the pattern matches HELP with enough confidence, the system displays and speaks Help. It is a student prototype with a small vocabulary and clear safety limits, aligned with better health access and reduced inequality.</p>
+        <div class="btn-row">
+          <button class="btn btn-teal" onclick="markDone('viva'); celebrate()">Finish + confetti</button>
+          <button class="btn btn-ghost" onclick="go('home')">Home</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>VocalBridge Teammate Academy · vivo Ignite 2026 · Offline HTML · localStorage only · Admin: tap “VocalBridge” ×5 · Online scores via Netlify Functions</footer>
+  <div class="confetti" id="confetti"></div>
+
+  <!-- Admin modals -->
+  <div class="modal-bg" id="modalAsk">
+    <div class="modal">
+      <h3>Open Administrator?</h3>
+      <p class="muted">Hidden admin panel for reviewing scores and remarks.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="showPwModal()">OK</button>
+        <button class="btn btn-ghost" onclick="closeModals()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-bg" id="modalPw">
+    <div class="modal">
+      <h3>Administrator password</h3>
+      <div class="pw-row">
+        <input type="password" id="adminPw" placeholder="Password" />
+        <button class="btn btn-ghost" type="button" id="pwToggle" onclick="togglePw()">Show</button>
+      </div>
+      <p class="muted" id="pwErr" style="color:#c0392b;min-height:1.2em;"></p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="tryAdminLogin()">Enter</button>
+        <button class="btn btn-ghost" onclick="closeModals()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-bg" id="modalAdmin">
+    <div class="modal" style="max-width:640px;">
+      <h3>Administrator panel</h3>
+      <p class="muted">Scores on <b>this browser/device</b> only. Change player name on Home to track different people if they share a device.</p>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="refreshAdmin()">Refresh local</button>
+        <button class="btn btn-teal" onclick="refreshAdminOnline()">Load ONLINE scores</button>
+        <button class="btn btn-danger" onclick="clearLeaderboard()">Clear local history</button>
+        <button class="btn btn-ghost" onclick="closeModals()">Close</button>
+      </div>
+      <p class="muted" id="adminOnlineStatus" style="min-height:1.2em;"></p>
+      <div id="adminBody"></div>
+    </div>
+  </div>
+
+  <script>
+  const ADMIN_PASSWORD = "vb-admin-2026"; // change if you want
+  const QBANK = [{"q": "What is VocalBridge mainly trying to do?", "options": ["Replace all hospitals", "Turn residual muscle patterns into emergency word outputs", "Track GPS location", "Play music for patients"], "a": 1, "why": "It maps muscle-related patterns to small emergency intents like HELP.", "diff": "beginner"}, {"q": "Who is a realistic target user for Phase-1 claims?", "options": ["Only newborn infants", "Only professional athletes", "Anyone with zero muscle activity", "People who may still show residual muscle activity when attempting speech"], "a": 3, "why": "Residual activity is required for surface sensing.", "diff": "beginner"}, {"q": "What do surface electrodes do?", "options": ["Pick up tiny electrical activity on the skin", "Charge the ESP32 wirelessly", "Measure Wi-Fi only", "Inject medicine"], "a": 0, "why": "They are sticky pads for skin biopotentials.", "diff": "beginner"}, {"q": "What is Phase-1 success?", "options": ["Clinical certification", "Reliable rest vs HELP-style demo with honesty about limits", "Full paragraph speech", "Winning without a prototype"], "a": 1, "why": "Scoped working demo first.", "diff": "beginner"}, {"q": "If the system is unsure, it should:", "options": ["Output silence / no word", "Increase volume", "Restart Windows", "Guess randomly"], "a": 0, "why": "Silence is safer than a wrong emergency word.", "diff": "beginner"}, {"q": "AD8232 is primarily designed as:", "options": ["An ECG/heart-rate style front-end", "A solar panel", "A Bluetooth speaker", "A GPS module"], "a": 0, "why": "ECG front-end; we repurpose it.", "diff": "beginner"}, {"q": "Why mention ₹1.5 lakh devices?", "options": ["It is our BOM total", "Shows commercial AAC can be expensive vs our low-cost prototype", "Random number", "Judge fee"], "a": 1, "why": "Cost/access problem framing.", "diff": "beginner"}, {"q": "ESP32 in this project mainly:", "options": ["Reads sensor values and runs logic / PC link", "Replaces electrodes", "Cooks food", "Prints posters"], "a": 0, "why": "Microcontroller role.", "diff": "beginner"}, {"q": "Subvocal / attempted speech means:", "options": ["Singing loudly", "Sleep talking only", "Trying a word with little/no audible sound while muscles may still activate", "Typing on a phone"], "a": 2, "why": "Attempt without normal voice.", "diff": "beginner"}, {"q": "AAC means:", "options": ["Amazon shopping code", "Arduino Auto Cable", "A type of battery", "Augmentative and Alternative Communication tools"], "a": 3, "why": "Communication aids.", "diff": "beginner"}, {"q": "Which is a safety rule?", "options": ["Always mains power with pads on skin", "Surface pads + prefer battery/power-bank + adult for first tests", "Skip consent always", "Needle electrodes unsupervised"], "a": 1, "why": "Basic electrical + ethical safety.", "diff": "beginner"}, {"q": "Calibration means:", "options": ["Buying a new school", "Painting the enclosure", "Adjusting for person/session using measurements/examples", "Never changing settings"], "a": 2, "why": "Session/person specific setup.", "diff": "beginner"}, {"q": "Noise in signals can come from:", "options": ["Only Python errors", "Motion, swallowing, loose pads, electrical hum", "Only sunshine", "Only Bluetooth music"], "a": 1, "why": "Common artifact sources.", "diff": "beginner"}, {"q": "Threshold in Phase-1 is:", "options": ["A type of electrode gel", "A SDG number", "A cutoff between rest-like and action-like signal strength", "A Wi-Fi password"], "a": 2, "why": "Simple decision boundary.", "diff": "beginner"}, {"q": "Speaker/TTS is used to:", "options": ["Sense muscle signals", "Announce the decided word to caregivers", "Filter 50 Hz", "Power the AD8232"], "a": 1, "why": "Output stage only.", "diff": "beginner"}, {"q": "Why not claim full conversation?", "options": ["Because HTML cannot open", "Because judges hate talking", "Because ESP32 cannot light an LED", "Full continuous speech is far harder; we scope vocabulary"], "a": 3, "why": "Honest scoping.", "diff": "beginner"}, {"q": "Lab notebook is for:", "options": ["Logging dates, trials, failures, settings as proof of real work", "Storing passwords only", "Hiding mistakes forever", "Drawing memes only"], "a": 0, "why": "Authenticity + science process.", "diff": "beginner"}, {"q": "Group entry video later is usually:", "options": ["One team working-model video; both members appearing is smart", "Only teachers speak", "Two identical separate uploads required always", "Banned"], "a": 0, "why": "One project video.", "diff": "beginner"}, {"q": "SDGs used for this project concept:", "options": ["No SDGs", "Only SDG 7", "SDG 3 and 10 (health + reduced inequalities)", "Only SDG 14"], "a": 2, "why": "Health access + cost inequality.", "diff": "beginner"}, {"q": "Category/theme used:", "options": ["Agriculture climate only", "SoftTech + Advanced AI/ML Labs", "Cybersecurity only", "Sports"], "a": 1, "why": "Form choices for VocalBridge.", "diff": "beginner"}, {"q": "False HELP at rest means:", "options": ["Perfect accuracy", "Speaker is broken only", "Domain expired", "Threshold may be too low or noise is high"], "a": 3, "why": "Tune threshold / fix contact.", "diff": "beginner"}, {"q": "Missed real HELP means:", "options": ["Always delete the project", "PDF is too large", "Internet is offline", "Threshold may be too high or attempt too weak/placement bad"], "a": 3, "why": "Physical or threshold issue.", "diff": "beginner"}, {"q": "Beginner teammate should own:", "options": ["Notebook, counts, photos, filming, impact script, demo logistics", "Buying only ±9V dual supplies", "Secret dual identity as judge", "Nothing"], "a": 0, "why": "Real ops role.", "diff": "beginner"}, {"q": "Power bank is preferred because:", "options": ["It increases EMG frequency", "It replaces electrodes", "It looks expensive", "Better isolation mindset when electrodes contact skin vs careless mains setups"], "a": 3, "why": "Safety practice.", "diff": "beginner"}, {"q": "Prototype honesty includes:", "options": ["Hiding AD8232 origin", "Claiming CDSCO certification", "Stating student prototype limits and non-medical status", "Promising 100% accuracy"], "a": 2, "why": "Judges respect honesty.", "diff": "beginner"}, {"q": "HELP cloud means:", "options": ["Region of feature-space from many labeled HELP examples", "Speaker volume max", "Weather app", "Google Drive folder only"], "a": 0, "why": "Training distribution.", "diff": "beginner"}, {"q": "Rest examples are needed because:", "options": ["Amazon requires them", "ESP32 requires them to boot", "The system must learn what 'not HELP' looks like", "Decoration"], "a": 2, "why": "Negative class / baseline.", "diff": "beginner"}, {"q": "Swallow is a problem because:", "options": ["It can create large artifacts mistaken for intent", "It fixes noise", "It smells", "It charges batteries"], "a": 0, "why": "Artifact rejection needed.", "diff": "beginner"}, {"q": "Why forearm first?", "options": ["Judges forbid chin", "Easier strong signal while learning tools before harder placements", "Required by law", "AD8232 only works on arms"], "a": 1, "why": "Learning path.", "diff": "beginner"}, {"q": "Microphone-only is insufficient for target users when:", "options": ["They speak perfectly always", "They cannot produce usable audible speech", "Mic costs ₹0", "FFT is illegal"], "a": 1, "why": "Problem motivation.", "diff": "beginner"}, {"q": "Confidence score high means:", "options": ["Room is quiet only", "Battery full", "Domain is paid", "Model is relatively sure about the label"], "a": 3, "why": "Decision certainty.", "diff": "beginner"}, {"q": "What is NOT a good overclaim?", "options": ["Student prototype for emergency intents", "Repurposed low-cost front-end", "Phase-1 rest vs HELP", "We fully solve all muteness cases worldwide this month"], "a": 3, "why": "Avoid absolute medical miracles.", "diff": "beginner"}, {"q": "vivo Ignite Stage 1 needed:", "options": ["Working hospital trial", "Idea form + poster style materials", "National finale only", "Nothing"], "a": 1, "why": "Idea stage.", "diff": "beginner"}, {"q": "If teammate may travel later:", "options": ["Plan roles so demo can work even if one presents; ask support if roster changes", "Buy two domains", "Ignore support", "Delete project"], "a": 0, "why": "Practical team planning.", "diff": "beginner"}, {"q": "Why multi-channel sensing can help word separation?", "options": ["Different sites capture different components of muscle activity patterns", "It removes the need for labels", "It increases Wi-Fi speed", "It eliminates all noise forever"], "a": 0, "why": "Spatial diversity of signals.", "diff": "medium"}, {"q": "Why band-limit / filter signals?", "options": ["Keep useful activity band and reduce drift/hum where possible", "To charge electrodes", "To make PDF smaller", "For fun colors"], "a": 0, "why": "SNR improvement.", "diff": "medium"}, {"q": "Personal calibration matters because:", "options": ["Users differ in anatomy, effort, placement, and skin contact", "Everyone has identical signals", "ESP32 forbids shared models", "SDGs require it"], "a": 0, "why": "Inter-subject variability.", "diff": "medium"}, {"q": "A confusion matrix helps by:", "options": ["Hiding errors", "Replacing the sensor", "Showing which labels are mixed up (e.g., HELP vs YES)", "Setting domain DNS"], "a": 2, "why": "Error structure.", "diff": "medium"}, {"q": "Artifact rejection tries to:", "options": ["Avoid classifying swallow/motion spikes as words", "Delete the teammate", "Unlock admin mode", "Increase speaker bass"], "a": 0, "why": "Safety/quality.", "diff": "medium"}, {"q": "Sliding windows are used to:", "options": ["Measure domain price", "Continuously examine short signal segments for decisions", "Cool the ESP32", "Decorate UI"], "a": 1, "why": "Online detection.", "diff": "medium"}, {"q": "Feature examples for EMG-like bursts include:", "options": ["Only SDG icons", "MAV/RMS/duration/simple shape stats", "School name only", "Only JPEG size"], "a": 1, "why": "Classic time-domain features.", "diff": "medium"}, {"q": "Why start with Random Forest / simple models before deep nets?", "options": ["They need dual ±9V", "Baselines are easier to train/explain with small data", "They are illegal later", "Judges ban them"], "a": 1, "why": "Data efficiency + explainability.", "diff": "medium"}, {"q": "Train/test split matters to:", "options": ["Avoid USB cables", "Estimate generalization beyond memorized trials", "Reduce electrode cost", "Make graphs purple"], "a": 1, "why": "Honest accuracy.", "diff": "medium"}, {"q": "Class imbalance (many REST, few HELP) can cause:", "options": ["Free domains", "Faster Wi-Fi", "Automatic medical certification", "Model biased to always predict REST"], "a": 3, "why": "Learning bias.", "diff": "medium"}, {"q": "Debouncing HELP output prevents:", "options": ["Spam triggers from brief crossings of threshold", "Learning", "Poster uploads", "Electrode drying"], "a": 0, "why": "Temporal stability.", "diff": "medium"}, {"q": "Cooldown cooldown after speech output helps:", "options": ["Increase false alarms", "Cool the room", "Delete labels", "Avoid repeated triggers and speaker-related disruption"], "a": 3, "why": "UX + stability.", "diff": "medium"}, {"q": "Why log false positives and false negatives separately?", "options": ["Only FN matters", "Different fixes: threshold, placement, artifacts, vocabulary", "Only FP matters", "For stickers"], "a": 1, "why": "Different error types.", "diff": "medium"}, {"q": "BLE vs USB in prototypes:", "options": ["USB serial is fine for early demos; BLE is a later wearable upgrade", "USB forbids graphs", "BLE is required day 1", "BLE removes noise completely"], "a": 0, "why": "Engineering stages.", "diff": "medium"}, {"q": "Why mark electrode positions?", "options": ["To hide the board", "Fashion", "Repeatability across sessions", "Required by Amazon"], "a": 2, "why": "Reproducibility.", "diff": "medium"}, {"q": "50 Hz issues are common because:", "options": ["Mains power interference in many regions including India", "ESP32 runs only at 50 Hz", "FFT forbids other frequencies", "Muscles only fire at 50 Hz"], "a": 0, "why": "Power-line interference.", "diff": "medium"}, {"q": "Cross-validation is useful when:", "options": ["You only have one sample", "Dataset is limited and you want stabler performance estimates", "You dislike Python", "You have infinite patients"], "a": 1, "why": "Small-data evaluation.", "diff": "medium"}, {"q": "Transfer learning / fine-tune idea in abstract means:", "options": ["Adapting a base model quickly to a new user with few samples", "Replacing ESP32 with a potato", "Changing SDGs", "Free vacation"], "a": 0, "why": "Personalization concept.", "diff": "medium"}, {"q": "Why confidence threshold 0.8 style rules?", "options": ["Random", "Disable speaker forever", "Maximize wrong words", "Trade fewer wrong words for more refusals"], "a": 3, "why": "Precision over forced recall.", "diff": "medium"}, {"q": "On-device vs laptop inference:", "options": ["Same always", "On-device is always required at idea stage", "Laptop is illegal", "Laptop is easier early; on-device is future scope and harder"], "a": 3, "why": "Scope staging.", "diff": "medium"}, {"q": "Differential measurement concept:", "options": ["Double the speaker volume", "Measure only one wire to moon", "Delete GND", "Emphasize difference between electrodes to reduce shared noise"], "a": 3, "why": "Common-mode rejection idea.", "diff": "medium"}, {"q": "Why document failures?", "options": ["Shame", "Raises domain cost", "Shows real engineering process and authenticity", "Deletes XP"], "a": 2, "why": "Scientific maturity.", "diff": "medium"}, {"q": "Speaker can affect sensing if:", "options": ["It is off", "Electrical/mechanical coupling injects noise into sensitive analog path", "TTS is English", "PDF is open"], "a": 1, "why": "EMI / coupling.", "diff": "medium"}, {"q": "Ethical demo practice includes:", "options": ["Consent, supervision, honest claims", "Posting medical diagnoses online", "Hiding limits", "Secretly testing strangers without consent"], "a": 0, "why": "Ethics.", "diff": "medium"}, {"q": "Why small vocabulary improves success odds?", "options": ["Judges ban large vocab", "ESP32 can only store one string", "Classes more separable; less overlap risk", "Harder math"], "a": 2, "why": "Problem difficulty.", "diff": "medium"}, {"q": "Metric to report beyond accuracy:", "options": ["Only battery brand", "Only wallpaper color", "Only follower count", "False alarm rate, misses, latency, per-class results"], "a": 3, "why": "Richer evaluation.", "diff": "medium"}, {"q": "Data augmentation examples:", "options": ["Slight noise/time stretch on signals to expand training variety", "Delete rest class", "Ban forearm tests", "Duplicate the PDF"], "a": 0, "why": "Generalization help.", "diff": "medium"}, {"q": "Why not dual ±9V muscle boards first?", "options": ["They remove need for electrodes", "They are free always", "They are always better", "Power complexity high for beginners; AD8232 path is simpler for Phase-1"], "a": 3, "why": "Risk management.", "diff": "medium"}, {"q": "Placement sensitivity means:", "options": ["Small pad position changes alter signals a lot", "Domain DNS only", "GPS error", "Speaker volume only"], "a": 0, "why": "Practical EMG reality.", "diff": "medium"}, {"q": "Baseline drift refers to:", "options": ["Slow wandering of signal offset over time", "Winning the finale", "SDG icons moving", "HTML localStorage"], "a": 1, "why": "Signal conditioning issue.", "diff": "medium"}, {"q": "Edge AI in the title suggests:", "options": ["No software", "Skateboarding", "Cloud-only forever", "Processing/intelligence near the device/user rather than only cloud hospitals"], "a": 3, "why": "Product direction.", "diff": "medium"}, {"q": "Why caregivers need audio output?", "options": ["Electrodes require sound", "They may not watch a screen continuously", "Decoration", "FFT requires speakers"], "a": 1, "why": "Use-case design.", "diff": "medium"}, {"q": "Prototype vs product difference:", "options": ["Prototype proves feasibility with limits; product needs validation, reliability, regulation", "Prototype is illegal", "None", "Product needs no testing"], "a": 0, "why": "Scope honesty.", "diff": "medium"}, {"q": "Why ECG-oriented analog bandwidth can hurt fine EMG word discrimination?", "options": ["Labels become English", "Front-end filtering/gain targets cardiac-like content; speech-muscle detail may be attenuated or colored", "ESP32 cannot sample", "It always improves speech recognition"], "a": 1, "why": "Hardware mismatch to task.", "diff": "advanced"}, {"q": "Common-mode interference is reduced when:", "options": ["You remove all grounds forever", "You only use REST labels", "Differential sensing rejects signals common to both inputs", "You max the speaker"], "a": 2, "why": "Instrumentation concept.", "diff": "advanced"}, {"q": "A notch filter near line frequency is intended to:", "options": ["Attenuate narrowband mains hum", "Amplify swallows", "Translate Hindi", "Charge LiPo cells"], "a": 0, "why": "Hum suppression.", "diff": "advanced"}, {"q": "Envelope extraction after rectification roughly tracks:", "options": ["Wi-Fi SSID", "Burst amplitude over time rather than raw fast oscillations only", "PDF page count", "Domain price"], "a": 1, "why": "Amplitude timeline.", "diff": "advanced"}, {"q": "ROC / threshold sweeps help because:", "options": ["They show tradeoffs between false alarms and misses as threshold changes", "They certify medical devices", "They look fancy only", "They replace datasets"], "a": 0, "why": "Operating point choice.", "diff": "advanced"}, {"q": "User-independent models often fail because:", "options": ["ESP32 forbids multiple users", "SDG 3 bans it", "Mathematics is illegal", "Anatomy, effort, and placement differ across people"], "a": 3, "why": "Generalization gap.", "diff": "advanced"}, {"q": "Session-dependent impedance changes cause:", "options": ["Automatic dual supply", "Only better accuracy always", "Free custom domains", "Signal amplitude/quality shifts needing re-calibration"], "a": 3, "why": "Skin-electrode interface.", "diff": "advanced"}, {"q": "Latency budget includes:", "options": ["Only quiz XP", "Only poster print time", "Sense→process→decide→TTS pipeline delays", "Only Amazon delivery"], "a": 2, "why": "System timing.", "diff": "advanced"}, {"q": "Why refuse output under low confidence is a product feature?", "options": ["It increases false HELPs", "It removes need for electrodes", "Emergency wrong words can cause harm; abstention can be safer", "It hides bugs always"], "a": 2, "why": "Safety UX.", "diff": "advanced"}, {"q": "Class overlap between similar mouthed words implies:", "options": ["Even good models may fail; choose distinct vocabulary", "AD8232 becomes MyoWare automatically", "Speaker volume fixes it", "Perfect separation always"], "a": 0, "why": "Intrinsic difficulty.", "diff": "advanced"}, {"q": "Leakage in evaluation happens if:", "options": ["Train and test windows share the same trials without separation", "You use REST class", "You filter hum", "You use a notebook"], "a": 0, "why": "Invalid accuracy.", "diff": "advanced"}, {"q": "Window length too short may:", "options": ["Always improve language modeling", "Charge batteries faster", "Miss word-scale temporal structure", "Remove ethics needs"], "a": 2, "why": "Feature horizon.", "diff": "advanced"}, {"q": "Window length too long may:", "options": ["Delete noise forever", "Always be best", "Fix dual ±9V", "Blend multiple events and increase latency"], "a": 3, "why": "Time resolution tradeoff.", "diff": "advanced"}, {"q": "Motion artifact often occupies:", "options": ["Only BLE advertising channels", "Only optical bands", "Only SDG colors", "Lower frequency content overlapping drift/movement"], "a": 3, "why": "Spectral overlap issues.", "diff": "advanced"}, {"q": "Why report per-user calibration time?", "options": ["Random metric", "Required for HTML", "Practical deployability for caregivers", "Replaces accuracy"], "a": 2, "why": "Us friction.", "diff": "advanced"}, {"q": "Ground/reference electrode on bony area aims to:", "options": ["Maximize muscle signal on reference", "Measure blood pressure", "Provide a quieter reference location", "Play TTS"], "a": 2, "why": "Reference strategy.", "diff": "advanced"}, {"q": "Quantization / ADC resolution matters because:", "options": ["It sets domain TTL", "It writes PDFs", "Screens look nicer", "Weak biopotentials need adequate digital resolution after gain"], "a": 3, "why": "Measurement fidelity.", "diff": "advanced"}, {"q": "Aliasing risk appears if:", "options": ["You use power banks", "You use labels", "Sampling is far above content", "Sampling is too low relative to signal content after filtering"], "a": 3, "why": "Sampling theory.", "diff": "advanced"}, {"q": "A strong baseline to beat is:", "options": ["Ignoring REST", "Always saying HELP", "Random guessing / majority class", "Deleting test set"], "a": 2, "why": "Sanity baseline.", "diff": "advanced"}, {"q": "Domain shift example:", "options": ["New person, new gel dryness, new room noise", "Same person same day same placement", "Identical repeated trial", "Same threshold forever works"], "a": 0, "why": "Shift hurts models.", "diff": "advanced"}, {"q": "Explainability for judges can include:", "options": ["Showing rest vs action plots, threshold logic, confusion cases", "Only logo animation", "Hiding failures", "Secret passwords only"], "a": 0, "why": "Transparent engineering.", "diff": "advanced"}, {"q": "On-skin current safety mindset emphasizes:", "options": ["Mains referencing casually", "Needle EMG at home", "Max voltage always", "Isolation, low energy, correct module use, supervision"], "a": 3, "why": "Bioinstrumentation caution.", "diff": "advanced"}, {"q": "Why multi-stage filtering (analog + digital)?", "options": ["Digital alone is illegal", "Fashion", "Analog removes need for electrodes", "Analog conditions early; digital refines and adapts"], "a": 3, "why": "Signal chain design.", "diff": "advanced"}, {"q": "Early stopping / simple models reduce:", "options": ["Need for safety", "Only speaker cost", "Need for honesty", "Overfitting on tiny student datasets"], "a": 3, "why": "Small-data ML.", "diff": "advanced"}, {"q": "Active learning idea (advanced future):", "options": ["Ban calibration", "Delete uncertain samples silently without review", "Query uncertain samples for labeling to improve efficiently", "Random labeling forever"], "a": 2, "why": "Efficient data collection.", "diff": "advanced"}, {"q": "Sensor fusion future scope might add:", "options": ["Deleting REST class", "IMU to help reject motion windows", "Only more SDG icons", "Removing all labels"], "a": 1, "why": "Complementary modalities.", "diff": "advanced"}, {"q": "Clinical translation would require:", "options": ["Only a cool demo video", "Deleting disclaimers", "Using any sensor photo from Amazon", "Ethics, validation, reliability, regulatory pathways beyond school prototype"], "a": 3, "why": "Beyond competition prototype.", "diff": "advanced"}, {"q": "Cost vs performance Pareto means:", "options": ["Spend infinite always", "Ignore accuracy", "Ignore cost", "Choose operating points balancing BOM and accuracy"], "a": 3, "why": "Engineering tradeoff.", "diff": "advanced"}, {"q": "Why document electrode brand/batch?", "options": ["Required for HTML XP", "Useless", "Contact quality varies; reproducibility", "Sets FFT bins"], "a": 2, "why": "Experimental control.", "diff": "advanced"}, {"q": "A refusal dataset is useful to train:", "options": ["Only TTS voices", "Only SDG text", "When to stay silent on garbage inputs", "Always-speaking models"], "a": 2, "why": "Abstention learning.", "diff": "advanced"}, {"q": "Skin prep (clean/dry) mainly improves:", "options": ["Electrode contact and signal quality", "Poster DPI only", "Python versions", "Wi-Fi RSSI"], "a": 0, "why": "Interface impedance.", "diff": "advanced"}, {"q": "Burst detection vs continuous decode:", "options": ["Burst requires satellites", "Burst/intent detection is a narrower problem than continuous speech decode", "Same difficulty", "Continuous is always easier"], "a": 1, "why": "Problem reduction.", "diff": "advanced"}, {"q": "Why separate train users from test users for claims of generality?", "options": ["Because ESP32 crashes otherwise", "Avoid over-optimism from same-person leakage", "Because Amazon bans same users", "To make graphs empty"], "a": 1, "why": "Valid generalization claims.", "diff": "advanced"}];
+
+  const PANELS = [
+    {id:"home",label:"Home"},{id:"story",label:"1 · Story"},{id:"how",label:"2 · How"},
+    {id:"sensor",label:"3 · Sensor"},{id:"roles",label:"4 · Roles"},{id:"sim",label:"5 · Simulator"},
+    {id:"terms",label:"6 · Terms"},{id:"quiz",label:"7 · Quiz"},{id:"viva",label:"8 · Viva"}
+  ];
+  const TRACK = ["story","how","sensor","roles","sim","terms","quiz","viva"];
+
+  const state = {
+    xp:0, done:{}, termsOpened:{}, correct:0, wrong:0, streak:0,
+    difficulty:"beginner", playerName:"Guest",
+    usedByDiff:{beginner:[], medium:[], advanced:[]},
+    history:[], // {name,diff,correct,wrong,xp,ts,pct,remark}
+  };
+
+  function load(){
+    try{
+      const raw=localStorage.getItem("vb_academy_v2");
+      if(raw){
+        const o=JSON.parse(raw);
+        Object.assign(state,o);
+        if(!state.usedByDiff) state.usedByDiff={beginner:[],medium:[],advanced:[]};
+        if(!state.history) state.history=[];
+      }
+    }catch(e){}
+  }
+  function save(){
+    localStorage.setItem("vb_academy_v2", JSON.stringify(state));
+    renderStats();
+    updateRemark();
+  }
+
+  function renderNav(){
+    const nav=document.getElementById("nav"); nav.innerHTML="";
+    PANELS.forEach(p=>{
+      const b=document.createElement("button");
+      b.textContent=p.label; b.dataset.id=p.id;
+      if(state.done[p.id]) b.classList.add("done");
+      b.onclick=()=>go(p.id);
+      nav.appendChild(b);
+    });
+  }
+  function go(id){
+    document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active", p.dataset.panel===id));
+    document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active", b.dataset.id===id));
+    if(id==="sim") startSim();
+    if(id==="quiz") { updatePoolLeft(); if(!document.querySelector("#quizBox .q-card")) drawQuestion(); }
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  function markDone(id){
+    if(!state.done[id]){ state.done[id]=true; state.xp+=15; pushHistorySnapshot("section"); }
+    save(); renderNav();
+  }
+  function renderStats(){
+    document.getElementById("xp").textContent=state.xp;
+    document.getElementById("quizScore").textContent=state.correct;
+    document.getElementById("quizTotal").textContent=state.correct+state.wrong;
+    document.getElementById("secDone").textContent=TRACK.filter(s=>state.done[s]).length;
+    document.getElementById("progressBar").style.width=(TRACK.filter(s=>state.done[s]).length/TRACK.length*100)+"%";
+    document.getElementById("liveCorrect").textContent=state.correct;
+    document.getElementById("liveWrong").textContent=state.wrong;
+    document.getElementById("liveStreak").textContent=state.streak;
+    document.getElementById("playerName").textContent=state.playerName||"Guest";
+    document.getElementById("diffLabel").textContent=state.difficulty[0].toUpperCase()+state.difficulty.slice(1);
+    document.getElementById("quizDiffText").textContent=document.getElementById("diffLabel").textContent;
+    document.getElementById("nameInput").value=state.playerName==="Guest"?"":state.playerName;
+    document.querySelectorAll(".diff-btn").forEach(b=>b.classList.toggle("active", b.dataset.diff===state.difficulty));
+    updatePoolLeft();
+  }
+  function saveName(){
+    const v=document.getElementById("nameInput").value.trim()||"Guest";
+    state.playerName=v.slice(0,40);
+    save();
+    alert("Saved player name: "+state.playerName);
+  }
+  function setDiff(d){
+    state.difficulty=d;
+    save();
+    document.getElementById("quizBox").innerHTML="";
+    updatePoolLeft();
+  }
+
+  // checklist
+  const checks=["I can explain the problem in 20 seconds","I know HELP is pattern matching","I can explain AD8232 honestly","I know Phase-1 = rest vs HELP","I know safety basics","I have a real ops role","I can say who it is / isn't for"];
+  function renderChecklist(){
+    const box=document.getElementById("checklist"); box.innerHTML="";
+    checks.forEach((c,i)=>{
+      const lab=document.createElement("label");
+      const inp=document.createElement("input"); inp.type="checkbox";
+      inp.checked=!!state.done["ck_"+i];
+      inp.onchange=()=>{ state.done["ck_"+i]=inp.checked; if(inp.checked) state.xp+=5; save(); };
+      lab.appendChild(inp); lab.appendChild(document.createTextNode(c)); box.appendChild(lab);
+    });
+  }
+
+  const TERMS=[["EMG","Electrical activity from muscles via skin."],["Surface electrodes","Sticky pads — not needles."],["Subvocal / attempted speech","Trying a word with little/no sound."],["AD8232","ECG/heart front-end module, repurposed."],["ESP32","Board that reads sensor values."],["Noise","Motion, swallow, loose pads, 50 Hz hum."],["Threshold","Cutoff between rest and action."],["Calibration","Adjust for person/session."],["Classification","Pick best label for a pattern."],["Confidence gate","Unsure → silence."],["Phase-1","Rest vs HELP first."],["AAC","Alternative communication tools."]];
+  function renderTerms(){
+    const root=document.getElementById("terms"); root.innerHTML="";
+    TERMS.forEach(([n,d],i)=>{
+      const el=document.createElement("div");
+      el.className="term"+(state.termsOpened[i]?" open":"");
+      el.innerHTML=`<div class="name">${n}</div><div class="def">${d}</div>`;
+      el.onclick=()=>{ el.classList.toggle("open"); if(el.classList.contains("open")&&!state.termsOpened[i]){ state.termsOpened[i]=true; state.xp+=3; if(Object.keys(state.termsOpened).length>=TERMS.length) markDone("terms"); save(); } };
+      root.appendChild(el);
+    });
+  }
+  let flashIndex=0;
+  function renderFlash(){ const [n,d]=TERMS[flashIndex]; document.getElementById("flashFront").textContent=n; document.getElementById("flashBack").textContent=d; document.getElementById("flash").classList.remove("flipped"); }
+  function flipFlash(){ document.getElementById("flash").classList.toggle("flipped"); }
+  function nextFlash(){ flashIndex=(flashIndex+1)%TERMS.length; renderFlash(); }
+  function prevFlash(){ flashIndex=(flashIndex-1+TERMS.length)%TERMS.length; renderFlash(); }
+
+  // Quiz pool
+  function poolFor(diff){ return QBANK.map((q,i)=>({...q, id:i})).filter(q=>q.diff===diff); }
+  function remainingIds(){
+    const all=poolFor(state.difficulty).map(q=>q.id);
+    const used=new Set(state.usedByDiff[state.difficulty]||[]);
+    return all.filter(id=>!used.has(id));
+  }
+  function updatePoolLeft(){ document.getElementById("poolLeft").textContent=remainingIds().length; }
+
+  function remarkFor(pct){
+    if(pct>=90) return {cls:"great", text:"Outstanding — finals-ready understanding. Keep the honesty about limits; you’re carrying the team story well."};
+    if(pct>=75) return {cls:"good", text:"Strong work — you can represent this project. Polish viva answers and Phase-1 demo flow next."};
+    if(pct>=50) return {cls:"ok", text:"Solid start. Re-read How + Sensor, run the simulator, then retry Medium questions."};
+    return {cls:"low", text:"Keep going — open Story/How again, then Beginner quiz. Mistakes are data, not failure."};
+  }
+  function updateRemark(){
+    const t=state.correct+state.wrong;
+    const box=document.getElementById("remarkBox");
+    if(t<3){ box.className="remark"; box.textContent=""; return; }
+    const pct=Math.round(100*state.correct/t);
+    const r=remarkFor(pct);
+    box.className="remark show "+r.cls;
+    box.textContent=`${state.playerName}: ${pct}% · ${r.text}`;
+  }
+  function pushHistorySnapshot(reason){
+    const t=state.correct+state.wrong;
+    if(t===0 && reason==="section") return;
+    const pct=t?Math.round(100*state.correct/t):0;
+    state.history.unshift({
+      name: state.playerName, diff: state.difficulty,
+      correct: state.correct, wrong: state.wrong, xp: state.xp,
+      pct, remark: remarkFor(pct).text, ts: new Date().toISOString(), reason
+    });
+    state.history=state.history.slice(0,50);
+  }
+
+  function drawQuestion(){
+    const left=remainingIds();
+    updatePoolLeft();
+    const box=document.getElementById("quizBox");
+    if(!left.length){
+      box.innerHTML=`<div class="card"><p><b>Pool complete</b> for ${state.difficulty}. Reset the question pool to reuse questions, or switch difficulty.</p></div>`;
+      markDone("quiz");
+      pushHistorySnapshot("pool_complete");
+      save();
+      miniConfetti();
+      return;
+    }
+    const id=left[Math.floor(Math.random()*left.length)];
+    const item=QBANK[id];
+    state.usedByDiff[state.difficulty]=state.usedByDiff[state.difficulty]||[];
+    state.usedByDiff[state.difficulty].push(id);
+    save();
+
+    const badge=`<span class="diff-badge diff-${item.diff}">${item.diff}</span>`;
+    let opts="";
+    item.options.forEach((opt,oi)=>{
+      opts+=`<button class="opt" data-a="${item.a}" data-o="${oi}">${String.fromCharCode(65+oi)}. ${opt}</button>`;
+    });
+    box.innerHTML=`<div class="q-card card" style="padding:.9rem 1rem">
+      <div class="qtext">${badge} ${item.q}</div>
+      <div class="options">${opts}</div>
+      <div class="feedback" id="fb"></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="drawQuestion()">Next random question</button></div>
+    </div>`;
+    box.querySelectorAll(".opt").forEach(btn=>{
+      btn.onclick=()=>{
+        if(btn.disabled) return;
+        const oi=+btn.dataset.o, ans=+btn.dataset.a;
+        box.querySelectorAll(".opt").forEach(b=>{
+          b.disabled=true;
+          if(+b.dataset.o===ans) b.classList.add("correct");
+          if(+b.dataset.o===oi && oi!==ans) b.classList.add("wrong");
+        });
+        document.getElementById("fb").textContent=item.why;
+        if(oi===ans){ state.correct++; state.streak++; state.xp+=10+Math.min(state.streak,5); if(state.streak>=3) miniConfetti(); }
+        else { state.wrong++; state.streak=0; }
+        pushHistorySnapshot("answer");
+        save();
+      };
+    });
+  }
+  function resetPoolOnly(){
+    state.usedByDiff[state.difficulty]=[];
+    save();
+    document.getElementById("quizBox").innerHTML="";
+    updatePoolLeft();
+    alert("Question pool reset for "+state.difficulty+".");
+  }
+  function resetQuizScores(){
+    state.correct=0; state.wrong=0; state.streak=0;
+    save();
+    updateRemark();
+  }
+
+  // Viva
+  const VIVA=[["What is your project?","Low-cost prototype using surface muscle signals for emergency intents like HELP → text/speech."],["Who is it for?","People with residual muscle activity when attempting speech — not zero-activity cases."],["How does it detect HELP?","Labeled examples → pattern match; not English understanding."],["Isn’t AD8232 for heartbeat?","Yes, ECG front-end repurposed as cheap biopotential amp for a student prototype."],["Why not only a microphone?","Target users may lack usable audible speech."],["Phase-1 success?","Clear rest vs HELP-style detection, few false alarms, honest limits."],["What can go wrong?","Loose pads, motion, swallow, hum, weak attempts, overclaiming."],["What did you do?","State your real role specifically."],["Is this safe?","Surface pads, prefer power bank, adult for first tests, not a medical device."],["Cost?","Starter parts around a couple thousand rupees vs much costlier commercial AAC."]];
+  let vivaIndex=0;
+  function renderViva(){ document.getElementById("vivaQ").textContent="Judge: "+VIVA[vivaIndex][0]; const a=document.getElementById("vivaA"); a.classList.remove("show"); a.textContent=""; document.getElementById("vivaInput").value=""; }
+  function revealViva(){ const a=document.getElementById("vivaA"); a.textContent="Model answer: "+VIVA[vivaIndex][1]; a.classList.add("show"); state.xp+=2; save(); }
+  function nextViva(){ vivaIndex=(vivaIndex+1)%VIVA.length; renderViva(); }
+  function randomViva(){ vivaIndex=Math.floor(Math.random()*VIVA.length); renderViva(); }
+
+  // Simulator
+  let mode="rest", phase=0, simRunning=false, raf=null;
+  function setMode(m){ mode=m; document.getElementById("mMode").textContent=m; }
+  function strengthFromMode(t){
+    const noise=(Math.random()-0.5)*8;
+    if(mode==="rest") return 18+noise+Math.sin(t*2)*2;
+    if(mode==="help"){ const burst=Math.max(0,Math.sin(t*3.2))**2; return 22+burst*55+noise; }
+    return ((Math.sin(t*1.3)>0.92)?70:20)+noise;
+  }
+  function startSim(){
+    if(simRunning) return; simRunning=true;
+    const c=document.getElementById("wave");
+    c.width=c.clientWidth*(window.devicePixelRatio||1);
+    c.height=180*(window.devicePixelRatio||1);
+    const g=c.getContext("2d"); const hist=new Array(120).fill(20);
+    function frame(){
+      phase+=0.08; const s=strengthFromMode(phase); hist.push(s); hist.shift();
+      const thr=+document.getElementById("thresh").value;
+      document.getElementById("threshVal").textContent=thr;
+      document.getElementById("mStrength").textContent=s.toFixed(0);
+      const mean=hist.slice(-15).reduce((a,b)=>a+b,0)/15;
+      let conf=mean>thr+12?Math.min(0.99,(mean-thr)/40):(mean<thr-5?0.1:0.45);
+      document.getElementById("mConf").textContent=conf.toFixed(2);
+      const dec=document.getElementById("decision");
+      if(mean>thr && conf>=0.55 && mode!=="swallow"){ dec.textContent="OUTPUT: HELP"; dec.className="decision help"; }
+      else if(mode==="swallow"&&mean>thr){ dec.textContent="RISK: NOISE SPIKE (reject / silence)"; dec.className="decision unsure"; }
+      else if(mean>thr&&conf<0.55){ dec.textContent="UNCERTAIN → SILENCE"; dec.className="decision unsure"; }
+      else { dec.textContent="REST / SILENCE"; dec.className="decision rest"; }
+      const W=c.width,H=c.height; g.clearRect(0,0,W,H);
+      g.strokeStyle="rgba(255,255,255,.06)";
+      for(let y=0;y<H;y+=H/6){ g.beginPath(); g.moveTo(0,y); g.lineTo(W,y); g.stroke(); }
+      const thrY=H-(thr/100)*(H*0.85)-H*0.05;
+      g.strokeStyle="rgba(232,163,23,.85)"; g.setLineDash([6,6]); g.beginPath(); g.moveTo(0,thrY); g.lineTo(W,thrY); g.stroke(); g.setLineDash([]);
+      g.strokeStyle="#3de3b5"; g.lineWidth=2.5; g.beginPath();
+      hist.forEach((v,i)=>{ const x=(i/(hist.length-1))*W; const y=H-(v/100)*(H*0.85)-H*0.05; if(i===0)g.moveTo(x,y); else g.lineTo(x,y); });
+      g.stroke();
+      raf=requestAnimationFrame(frame);
+    }
+    cancelAnimationFrame(raf); frame();
+  }
+  function simQuiz(){
+    const thr=+document.getElementById("thresh").value;
+    let msg= thr<35?"Threshold low — risk of false HELPs.": thr>75?"Threshold high — may miss HELP.":"Mid threshold OK for this sim; real life uses measured rest/action.";
+    state.xp+=8; save(); alert(msg+"\n+8 XP");
+  }
+
+  function miniConfetti(){
+    const root=document.getElementById("confetti");
+    const colors=["#e8a317","#1a7a6d","#0b3d5c","#7dcea0","#f39c12"];
+    for(let i=0;i<40;i++){ const d=document.createElement("div"); d.className="dot"; d.style.left=Math.random()*100+"vw"; d.style.top="-10px"; d.style.background=colors[i%colors.length]; d.style.animationDuration=(0.9+Math.random()*0.8)+"s"; root.appendChild(d); setTimeout(()=>d.remove(),1500); }
+  }
+  function celebrate(){ markDone("viva"); state.xp+=20; pushHistorySnapshot("complete"); save(); miniConfetti(); setTimeout(miniConfetti,200); alert("Core path complete. XP: "+state.xp+"\n"+remarkFor(state.correct+state.wrong?Math.round(100*state.correct/(state.correct+state.wrong)):0).text); }
+
+  // Admin easter egg
+  let logoClicks=0, logoTimer=null;
+  function closeModals(){ ["modalAsk","modalPw","modalAdmin"].forEach(id=>document.getElementById(id).classList.remove("show")); document.getElementById("pwErr").textContent=""; document.getElementById("adminPw").value=""; }
+  function showPwModal(){ document.getElementById("modalAsk").classList.remove("show"); document.getElementById("modalPw").classList.add("show"); document.getElementById("adminPw").focus(); }
+  function togglePw(){
+    const i=document.getElementById("adminPw"); const b=document.getElementById("pwToggle");
+    if(i.type==="password"){ i.type="text"; b.textContent="Hide"; } else { i.type="password"; b.textContent="Show"; }
+  }
+  function tryAdminLogin(){
+    const v=document.getElementById("adminPw").value;
+    if(v===ADMIN_PASSWORD){ document.getElementById("modalPw").classList.remove("show"); document.getElementById("modalAdmin").classList.add("show"); refreshAdmin(); }
+    else document.getElementById("pwErr").textContent="Incorrect password.";
+  }
+  function refreshAdmin(){
+    const t=state.correct+state.wrong; const pct=t?Math.round(100*state.correct/t):0;
+    const r=remarkFor(pct);
+    let rows=state.history.map(h=>`<tr><td>${escapeHtml(h.name)}</td><td>${h.diff}</td><td>${h.correct}/${h.correct+h.wrong} (${h.pct}%)</td><td>${h.xp}</td><td>${new Date(h.ts).toLocaleString()}</td><td>${escapeHtml(h.remark||"")}</td></tr>`).join("");
+    if(!rows) rows=`<tr><td colspan="6">No history yet — play the quiz as a named player.</td></tr>`;
+    document.getElementById("adminBody").innerHTML=`
+      <h4>Current session</h4>
+      <p><b>${escapeHtml(state.playerName)}</b> · ${state.difficulty} · ${state.correct} correct / ${state.wrong} wrong · ${pct}% · XP ${state.xp}</p>
+      <div class="remark show ${r.cls}">${escapeHtml(r.text)}</div>
+      <h4 style="margin-top:1rem;">Leaderboard / history (this device)</h4>
+      <table class="admin-table"><thead><tr><th>Name</th><th>Diff</th><th>Score</th><th>XP</th><th>Time</th><th>Remark</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="muted" style="margin-top:.6rem;">Tip: each teammate should set their name on Home before quizzing if they share a computer.</p>
+      <p class="muted">Admin password is set in the HTML source as ADMIN_PASSWORD (default: vb-admin-2026).</p>`;
+  }
+  function clearLeaderboard(){ if(confirm("Clear history on this device?")){ state.history=[]; save(); refreshAdmin(); } }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+
+
+  // ---- Online backend (Netlify Functions) ----
+  function apiBase() {
+    // Same origin when deployed on Netlify
+    return "";
+  }
+  function getClientId() {
+    let id = localStorage.getItem("vb_client_id");
+    if (!id) {
+      id = "c_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem("vb_client_id", id);
+    }
+    return id;
+  }
+  async function submitScoreOnline() {
+    const el = document.getElementById("submitStatus");
+    const total = state.correct + state.wrong;
+    if (total === 0) {
+      el.textContent = "Answer at least one quiz question first.";
+      el.style.color = "#c0392b";
+      return;
+    }
+    el.textContent = "Submitting…";
+    el.style.color = "#5a6570";
+    const usedCount = (state.usedByDiff[state.difficulty] || []).length;
+    const payload = {
+      name: state.playerName || "Guest",
+      difficulty: state.difficulty,
+      correct: state.correct,
+      wrong: state.wrong,
+      xp: state.xp,
+      usedCount,
+      clientId: getClientId(),
+    };
+    try {
+      const res = await fetch(apiBase() + "/.netlify/functions/submit-score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || ("HTTP " + res.status));
+      }
+      el.textContent = "Submitted online for " + payload.name + " · " + data.entry.pct + "% · " + data.entry.remark;
+      el.style.color = "#1a7a6d";
+      pushHistorySnapshot("online_submit");
+      save();
+      miniConfetti();
+    } catch (err) {
+      el.textContent = "Submit failed (are you on Netlify with Functions?). " + err.message;
+      el.style.color = "#c0392b";
+    }
+  }
+
+  async function refreshAdminOnline() {
+    const st = document.getElementById("adminOnlineStatus");
+    st.textContent = "Loading online scores…";
+    try {
+      const res = await fetch(
+        apiBase() + "/.netlify/functions/admin-scores?password=" + encodeURIComponent(ADMIN_PASSWORD)
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || ("HTTP " + res.status));
+      st.textContent = "Online OK · " + data.count + " recent events · " + (data.players||[]).length + " players · " + data.serverTime;
+      renderAdminOnline(data);
+    } catch (err) {
+      st.textContent = "Online load failed: " + err.message;
+      refreshAdmin(); // fallback local
+    }
+  }
+
+  function renderAdminOnline(data) {
+    const players = data.players || [];
+    const events = data.events || [];
+    const t = state.correct + state.wrong;
+    const pct = t ? Math.round(100 * state.correct / t) : 0;
+    const r = remarkFor(pct);
+    let prow = players.map(p =>
+      `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.difficulty||"")}</td><td>${p.correct||0}/${(p.correct||0)+(p.wrong||0)} (${p.pct||0}%)</td><td>${p.xp||0}</td><td>${p.ts ? new Date(p.ts).toLocaleString() : ""}</td><td>${escapeHtml(p.remark||"")}</td></tr>`
+    ).join("") || `<tr><td colspan="6">No online players yet. Teammates must click Submit score online.</td></tr>`;
+    let erow = events.slice(0, 40).map(e =>
+      `<tr><td>${escapeHtml(e.name)}</td><td>${escapeHtml(e.difficulty||"")}</td><td>${e.correct}/${e.total} (${e.pct}%)</td><td>${e.xp}</td><td>${new Date(e.ts).toLocaleString()}</td><td>${escapeHtml(e.remark||"")}</td></tr>`
+    ).join("") || `<tr><td colspan="6">No events.</td></tr>`;
+    document.getElementById("adminBody").innerHTML = `
+      <h4>Your local session</h4>
+      <p><b>${escapeHtml(state.playerName)}</b> · ${state.difficulty} · ${state.correct}/${t||0} · ${pct}% · XP ${state.xp}</p>
+      <div class="remark show ${r.cls}">${escapeHtml(r.text)}</div>
+      <h4 style="margin-top:1rem;">ONLINE best by player</h4>
+      <table class="admin-table"><thead><tr><th>Name</th><th>Diff</th><th>Score</th><th>XP</th><th>Time</th><th>Remark</th></tr></thead><tbody>${prow}</tbody></table>
+      <h4 style="margin-top:1rem;">ONLINE recent submissions</h4>
+      <table class="admin-table"><thead><tr><th>Name</th><th>Diff</th><th>Score</th><th>XP</th><th>Time</th><th>Remark</th></tr></thead><tbody>${erow}</tbody></table>
+      <p class="muted" style="margin-top:.6rem;">Password must match Netlify env ADMIN_PASSWORD (default vb-admin-2026).</p>`;
+  }
+
+  
+  // init
+  load();
+  renderNav(); renderStats(); renderChecklist(); renderTerms(); renderFlash(); renderViva(); updateRemark();
+  document.getElementById("logoTap").addEventListener("click", ()=>{
+    logoClicks++;
+    clearTimeout(logoTimer);
+    logoTimer=setTimeout(()=>{ logoClicks=0; }, 2500);
+    if(logoClicks>=5){ logoClicks=0; document.getElementById("modalAsk").classList.add("show"); }
+  });
+  document.getElementById("adminPw").addEventListener("keydown", e=>{ if(e.key==="Enter") tryAdminLogin(); });
+  document.getElementById("thresh").addEventListener("input", e=> document.getElementById("threshVal").textContent=e.target.value);
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a190a58acd602141',t:'MTc4MzY5NzgxNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
